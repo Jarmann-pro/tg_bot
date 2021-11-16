@@ -1,0 +1,37 @@
+version: '3.1'
+
+services:
+  db:
+    container_name: database_bot_tg
+    image: sameersbn/postgresql:10-2
+    environment:
+      DB_NAME: $gino
+      PG_PASSWORD: $12345  
+    restart: always
+    ports:
+      - 5432:5432
+    networks:
+      - botnet
+# Uncomment volumes if you need locate db on local host
+#    volumes:
+#      - ./pgdata:/var/lib/postgresql/data
+
+  tgbot:
+    container_name: bot_tg
+    build:
+      context: .
+    command: python app.py
+    networks:
+      - botnet
+    restart: always
+    env_file:
+      - ".env"
+    # bot start after load db
+    depends_on:
+      - db
+
+# указываются используемые сети
+networks:
+  botnet:
+    # указывается драйвер сети
+    driver: bridge
